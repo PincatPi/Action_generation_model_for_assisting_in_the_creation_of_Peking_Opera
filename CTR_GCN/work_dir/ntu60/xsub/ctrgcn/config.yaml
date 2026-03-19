@@ -1,0 +1,67 @@
+# command line: /kaggle/input/datasets/yiyang1219/ctr-gcn/CTR-GCN-main/main.py --config /kaggle/input/datasets/yiyang1219/ctr-gcn/CTR-GCN-main/config/nturgbd-cross-subject/default_kaggle.yaml --work-dir /kaggle/working/work_dir/ntu60/xsub/ctrgcn --device 0 --batch-size 64 --num-worker 4
+
+base_lr: 0.1
+batch_size: 64
+config: /kaggle/input/datasets/yiyang1219/ctr-gcn/CTR-GCN-main/config/nturgbd-cross-subject/default_kaggle.yaml
+device:
+- 0
+eval_interval: 5
+feeder: feeders.feeder_ntu.Feeder
+ignore_weights: []
+log_interval: 100
+lr_decay_rate: 0.1
+model: model.ctrgcn.Model
+model_args:
+  graph: graph.ntu_rgb_d.Graph
+  graph_args:
+    labeling_mode: spatial
+  num_class: 60
+  num_person: 2
+  num_point: 25
+model_saved_name: ''
+nesterov: true
+num_epoch: 50
+num_worker: 4
+optimizer: SGD
+phase: train
+print_log: true
+save_epoch: 30
+save_interval: 1
+save_score: false
+seed: 1
+show_topk:
+- 1
+- 5
+start_epoch: 0
+step:
+- 25
+- 40
+test_batch_size: 64
+test_feeder_args:
+  bone: false
+  data_path: /kaggle/input/datasets/yiyang1219/ntu60-cs/NTU60_CS.npz
+  debug: false
+  p_interval:
+  - 0.95
+  split: test
+  vel: false
+  window_size: 64
+train_feeder_args:
+  bone: false
+  data_path: /kaggle/input/datasets/yiyang1219/ntu60-cs/NTU60_CS.npz
+  debug: false
+  normalization: false
+  p_interval:
+  - 0.5
+  - 1
+  random_choose: false
+  random_move: false
+  random_rot: true
+  random_shift: false
+  split: train
+  vel: false
+  window_size: 64
+warm_up_epoch: 5
+weight_decay: 0.0004
+weights: null
+work_dir: /kaggle/working/work_dir/ntu60/xsub/ctrgcn

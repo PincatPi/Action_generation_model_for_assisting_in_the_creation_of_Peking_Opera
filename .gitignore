@@ -1,0 +1,93 @@
+# ============================================
+# 项目特定忽略规则
+# ============================================
+
+# 1. conda_envs 文件夹
+conda_envs/
+
+# 2. vibe_win_install 文件夹
+vibe_win_install/
+
+# 3. VIBE 特定文件夹
+VIBE/converted_data/
+VIBE/data/
+VIBE/output/
+VIBE/doc/
+
+# 4. VIBE 中的视频文件
+VIBE/*.mp4
+VIBE/*.avi
+VIBE/*.mov
+VIBE/*.mkv
+
+# 5. CTR_GCN 数据文件夹
+CTR_GCN/data/
+
+# ============================================
+# Python 通用忽略规则
+# ============================================
+
+# 字节码文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 分发/打包文件
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# 单元测试/覆盖率
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.venv/
+
+# IDE 和编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# 日志文件
+*.log
+logs/
+
+# 模型检查点和大文件
+*.pth
+*.pt
+*.ckpt
+*.h5
+*.pkl
+*.pickle
+
+# 临时文件
+tmp/
+temp/
+*.tmp
