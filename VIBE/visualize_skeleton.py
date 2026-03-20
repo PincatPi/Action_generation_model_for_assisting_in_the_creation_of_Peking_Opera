@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import sys
+import argparse
  
 
 ## 读取关节数据
@@ -164,24 +165,35 @@ def Print3D(num_frame, point, arms, rightHand, leftHand, legs, body, speed=1.0):
  
 ## main函数
 def main():
-    sys.path.extend(['../'])  # 扩展路径
-    data_path = 'S001C001P001R001A001_person1.skeleton' # skeleton文件名
-    speed = 1.0  # 播放速度系数，大于1加速，小于1减速
+    parser = argparse.ArgumentParser(description='NTU RGB+D Skeleton 3D可视化工具')
+    parser.add_argument('skeleton_file', type=str, nargs='?', 
+                        default='S001C001P003R001A001_person1.skeleton',
+                        help='Skeleton文件路径')
+    parser.add_argument('--speed', type=float, default=1.0,
+                        help='播放速度系数，大于1加速，小于1减速 (默认: 1.0)')
     
-    point = read_xyz(data_path)   # 读取 x,y,z三个坐标
-    print('Read Data Done!') # 数据读取完毕
-    print(f'播放速度: {speed}x')
+    args = parser.parse_args()
+    
+    if not os.path.exists(args.skeleton_file):
+        print(f"错误: 文件不存在: {args.skeleton_file}")
+        return
+    
+    print(f"正在读取文件: {args.skeleton_file}")
+    point = read_xyz(args.skeleton_file)
+    print('Read Data Done!')
+    print(f'播放速度: {args.speed}x')
  
-    num_frame = point.shape[1] # 帧数
-    print(point.shape)  # 坐标数(3) × 帧数 × 关节数(25) × max_body(2)
+    num_frame = point.shape[1]
+    print(point.shape)
  
     # 相邻关节标号 
-    arms = [23, 11, 10, 9, 8, 20, 4, 5, 6, 7, 21] # 23 <-> 11 <-> 10 ...
-    rightHand = [11, 24] # 11 <-> 24
-    leftHand = [7, 22] # 7 <-> 22
-    legs = [19, 18, 17, 16, 0, 12, 13, 14, 15] # 19 <-> 18 <-> 17 ...
-    body = [3, 2, 20, 1, 0]  # 3 <-> 2 <-> 20 ...
+    arms = [23, 11, 10, 9, 8, 20, 4, 5, 6, 7, 21]
+    rightHand = [11, 24]
+    leftHand = [7, 22]
+    legs = [19, 18, 17, 16, 0, 12, 13, 14, 15]
+    body = [3, 2, 20, 1, 0]
     
-    Print3D(num_frame, point, arms, rightHand, leftHand, legs, body, speed=speed) # 3D可视化
- 
-main()
+    Print3D(num_frame, point, arms, rightHand, leftHand, legs, body, speed=args.speed)
+
+if __name__ == '__main__':
+    main()
