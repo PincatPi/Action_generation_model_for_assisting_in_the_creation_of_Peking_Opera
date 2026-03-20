@@ -189,8 +189,13 @@ def normalize_skeleton_sequence(joints, verbose=True):
     # VIBE输出的Y轴方向与NTU RGB+D相反，需要翻转
     joints[:, :, 1] = -joints[:, :, 1]
     
+    # 翻转Z轴坐标（索引2），使人物正面朝向Z轴正方向
+    # VIBE输出的Z轴方向与NTU RGB+D相反，需要翻转
+    joints[:, :, 2] = -joints[:, :, 2]
+    
     if verbose:
         print(f"  Y轴翻转: 已将Y轴坐标取反，人物模型现在沿Y轴正方向分布")
+        print(f"  Z轴翻转: 已将Z轴坐标取反，人物正面现在朝向Z轴正方向")
     
     return joints
 
