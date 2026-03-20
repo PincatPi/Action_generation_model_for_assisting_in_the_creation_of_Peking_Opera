@@ -153,3 +153,55 @@ def smooth_pose_and_cam_advanced(pred_pose, pred_betas, pred_cam, min_cutoff=0.0
         pred_cam_hat[idx] = cam_filter(t, pred_cam[idx])
 
     return np.vstack(pred_verts_hat), pred_pose_hat, np.vstack(pred_joints3d_hat), pred_cam_hat
+
+
+def smooth_pose_and_cam_bidirectional(pred_pose, pred_betas, pred_cam, min_cutoff=0.004, beta=0.7, orient_min_cutoff=0.0005, orient_beta=3.0):
+    smpl = SMPL(model_path=SMPL_MODEL_DIR)
+    num_frames = pred_pose.shape[0]
+
+    def apply_one_euro_filter(data, min_cutoff, beta):
+        forward_filter = OneEuroFilter(
+            np.zeros_like(data[0]),
+            data[0],
+            min_cutoff=min_cutoff,
+            beta=beta,
+        )
+        forward_result = np.zeros_like(data)
+        forward_result[0] = data[0]
+        for idx in range(1, len(data)):
+            t = np.ones_like(data[0]) * idx
+            forward_result[idx] = forward_filter(t, data[idx])
+        return forward_result
+
+    orient_forward = apply_one_euro_filter(pred_pose[:, :3], orient_min_cutoff, orient_beta)
+    orient_backward = apply_one_euro_filter(pred_pose[::-1, :3], orient_min_cutoff, orient_beta)[::-1]
+    orient_smoothed = (orient_forward + orient_backward) / 2.0
+
+    body_pose_smoothed = apply_one_euro_filter(pred_pose[:, 3:], min_cutoff, beta)
+
+    pred_pose_hat = np.concatenate([orient_smoothed, body_pose_smoothed], axis=1)
+
+    pred_verts_hat = []
+    pred_joints3d_hat = []
+    for idx in range(num_frames):
+        smpl_output = smpl(
+            betas=torch.from_numpy(pred_betas[idx]).unsqueeze(0),
+            body_pose=torch.from_numpy(pred_pose_hat[idx, 3:]).unsqueeze(0),
+            global_orient=torch.from_numpy(pred_pose_hat[idx, :3]).unsqueeze(0),
+        )
+        pred_verts_hat.append(smpl_output.vertices.detach().cpu().numpy())
+        pred_joints3d_hat.append(smpl_output.joints.detach().cpu().numpy())
+
+    cam_filter = OneEuroFilter(
+        np.zeros_like(pred_cam[0]),
+        pred_cam[0],
+        min_cutoff=min_cutoff,
+        beta=beta,
+    )
+    pred_cam_hat = np.zeros_like(pred_cam)
+    pred_cam_hat[0] = pred_cam[0]
+    for idx in range(1, len(pred_cam)):
+        t = np.ones_like(pred_cam[0]) * idx
+        pred_cam_hat[idx] = cam_filter(t, pred_cam[idx])
+
+    return np.vstack(pred_verts_hat), pred_pose_hat, np.vstack(pred_joints3d_hat), pred_cam_hat

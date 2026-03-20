@@ -32,7 +32,7 @@ from torch.utils.data import DataLoader
 from lib.models.vibe import VIBE_Demo
 from lib.utils.renderer import Renderer
 from lib.dataset.inference import Inference
-from lib.utils.smooth_pose import smooth_pose, smooth_pose_and_cam, smooth_pose_and_cam_advanced
+from lib.utils.smooth_pose import smooth_pose, smooth_pose_and_cam, smooth_pose_and_cam_advanced, smooth_pose_and_cam_bidirectional
 from lib.data_utils.kp_utils import convert_kps
 from lib.utils.pose_tracker import run_posetracker
 
@@ -230,10 +230,10 @@ def main(args):
             beta = args.smooth_beta
             orient_min_cutoff = args.smooth_orient_min_cutoff
             orient_beta = args.smooth_orient_beta
-            print(f'Running smoothing on person {person_id}')
+            print(f'Running bidirectional smoothing on person {person_id}')
             print(f'  Body: min_cutoff={min_cutoff}, beta={beta}')
-            print(f'  Orientation: min_cutoff={orient_min_cutoff}, beta={orient_beta}')
-            pred_verts, pred_pose, pred_joints3d, pred_cam = smooth_pose_and_cam_advanced(
+            print(f'  Orientation: min_cutoff={orient_min_cutoff}, beta={orient_beta} (bidirectional)')
+            pred_verts, pred_pose, pred_joints3d, pred_cam = smooth_pose_and_cam_bidirectional(
                 pred_pose, pred_betas, pred_cam,
                 min_cutoff=min_cutoff, beta=beta,
                 orient_min_cutoff=orient_min_cutoff, orient_beta=orient_beta
