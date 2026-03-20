@@ -32,7 +32,7 @@ from torch.utils.data import DataLoader
 from lib.models.vibe import VIBE_Demo
 from lib.utils.renderer import Renderer
 from lib.dataset.inference import Inference
-from lib.utils.smooth_pose import smooth_pose, smooth_pose_and_cam
+from lib.utils.smooth_pose import smooth_pose, smooth_pose_and_cam, smooth_pose_and_cam_advanced
 from lib.data_utils.kp_utils import convert_kps
 from lib.utils.pose_tracker import run_posetracker
 
@@ -217,14 +217,26 @@ def main(args):
         pred_betas = pred_betas.cpu().numpy()
         pred_joints3d = pred_joints3d.cpu().numpy()
 
+        # -----------------------------------------------------------
+        # Stabilize body shape by averaging betas across the sequence
+        avg_betas = np.mean(pred_betas, axis=0)
+        pred_betas = np.tile(avg_betas, (pred_betas.shape[0], 1))
+        print(f'Stabilized body shape parameters (betas) for person {person_id}')
+        # -----------------------------------------------------------
+
         # Runs 1 Euro Filter to smooth out the results
         if args.smooth:
-            min_cutoff = args.smooth_min_cutoff # 0.004
-            beta = args.smooth_beta # 1.5
-            print(f'Running smoothing on person {person_id}, min_cutoff: {min_cutoff}, beta: {beta}')
-            pred_verts, pred_pose, pred_joints3d, pred_cam = smooth_pose_and_cam(
+            min_cutoff = args.smooth_min_cutoff
+            beta = args.smooth_beta
+            orient_min_cutoff = args.smooth_orient_min_cutoff
+            orient_beta = args.smooth_orient_beta
+            print(f'Running smoothing on person {person_id}')
+            print(f'  Body: min_cutoff={min_cutoff}, beta={beta}')
+            print(f'  Orientation: min_cutoff={orient_min_cutoff}, beta={orient_beta}')
+            pred_verts, pred_pose, pred_joints3d, pred_cam = smooth_pose_and_cam_advanced(
                 pred_pose, pred_betas, pred_cam,
-                min_cutoff=min_cutoff, beta=beta
+                min_cutoff=min_cutoff, beta=beta,
+                orient_min_cutoff=orient_min_cutoff, orient_beta=orient_beta
             )
 
         orig_cam = convert_crop_cam_to_orig_img(
@@ -401,6 +413,14 @@ if __name__ == '__main__':
     parser.add_argument('--smooth_beta', type=float, default=0.7,
                         help='one euro filter beta. '
                              'Increasing the speed coefficient(beta) decreases speed lag.')
+
+    parser.add_argument('--smooth_orient_min_cutoff', type=float, default=0.0005,
+                        help='min cutoff for global orientation smoothing. '
+                             'Lower value = less orientation jitter (default: 0.0005)')
+
+    parser.add_argument('--smooth_orient_beta', type=float, default=3.0,
+                        help='beta for global orientation smoothing. '
+                             'Higher value = less lag during rotation (default: 3.0)')
 
     args = parser.parse_args()
 
